@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3, .logo {
+  font-family: 'Poppins', sans-serif;
+}
+
+.inputStyle {
+  @apply w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white transition;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+.bikes-grid { grid-template-columns: repeat(4, 1fr); }
+/* shrinks to 3 → 2 → 1 at smaller screens */
+.inputStyle {
+  @apply border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-400 transition;
+}
+
+.nextBtn {
+  @apply bg-teal-500 text-white px-6 py-3 rounded-xl hover:bg-teal-600 transition shadow-md;
+}
+
+.backBtn {
+  @apply bg-gray-200 px-6 py-3 rounded-xl hover:bg-gray-300 transition;
+}
+
+.submitBtn {
+  @apply bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-6 py-3 rounded-xl hover:scale-105 transition shadow-lg;
+}
