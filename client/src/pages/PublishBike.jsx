@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 
 const TOTAL_STEPS = 5;
 
