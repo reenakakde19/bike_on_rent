@@ -114,23 +114,31 @@ const BookingPage = () => {
       );
       const { orderId, amount, currency, key } = orderRes.data;
 
-      const options = {
-        key,
-        amount,
-        currency,
-        order_id: orderId,
-        name: "BikeOnRent",
-        description: "Bike Booking Payment",
-        handler: async (response) => {
-          await axios.post(
-            "http://localhost:5000/api/payment/verify",
-            { ...response, bookingId, amount },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          setStep(4);
-        },
-        theme: { color: "#20B2AA" },
-      };
+    const options = {
+  key,
+  amount,
+  currency,
+  order_id: orderId,
+  name: "BikeOnRent",
+  description: "Bike Booking Payment",
+
+  handler: async (response) => {
+    await axios.post(
+      "http://localhost:5000/api/payment/verify",
+      { ...response, bookingId },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setStep(4);
+  },
+
+  modal: {
+    ondismiss: function () {
+      alert("Payment cancelled");
+    }
+  },
+
+  theme: { color: "#20B2AA" }
+};
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err) {

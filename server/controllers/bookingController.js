@@ -260,3 +260,98 @@ export const uploadBookingDocs = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const acceptBooking = async (req, res) => {
+  try {
+
+    const { bookingId } = req.params;
+
+    const booking = await Booking.findByIdAndUpdate(
+      bookingId,
+      { bookingStatus: "APPROVED" },
+      { new: true }
+    )
+    .populate("renter")
+    .populate("owner")
+    .populate("bike");
+
+    if (!booking) {
+      return res.status(404).send("Booking not found");
+    }
+
+    const renter = booking.renter;
+
+    // SEND EMAIL TO RENTER
+    await sendEmail(
+      renter.email,
+      "Booking Confirmed 🚴",
+      "Your bike booking has been confirmed",
+      `
+      <div style="font-family:Arial;padding:20px;background:#f5f5f5">
+
+        <div style="max-width:600px;margin:auto;background:white;padding:25px;border-radius:8px">
+
+          <h2 style="color:#333">🎉 Booking Confirmed</h2>
+
+          <p>Hello <b>${renter.fullName}</b>,</p>
+
+          <p>Your booking for the bike <b>${booking.bike.name}</b> has been <b>accepted by the owner</b>.</p>
+
+          <p><b>Booking ID:</b> ${booking._id}</p>
+          <p><b>Start Date:</b> ${new Date(booking.startDate).toDateString()}</p>
+          <p><b>End Date:</b> ${new Date(booking.endDate).toDateString()}</p>
+
+          <p>Please contact the owner for pickup details.</p>
+
+          <p style="margin-top:20px;color:#777">
+          Thank you for using <b>BikeOnRent 🚴</b>
+          </p>
+
+        </div>
+
+      </div>
+      `
+    );
+
+    res.send("Booking accepted and renter notified by email");
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err.message);
+  }
+};
+
+export const rejectBooking = async (req, res) => {
+  try {
+
+    const { bookingId } = req.params;
+
+    const booking = await Booking.findByIdAndUpdate(
+      bookingId,
+      { bookingStatus: "REJECTED" },
+      { new: true }
+    ).populate("renter");
+
+    if (!booking) {
+      return res.status(404).send("Booking not found");
+    }
+
+    const renter = booking.renter;
+
+    await sendEmail(
+      renter.email,
+      "Booking Rejected",
+      "Your booking was rejected",
+      `
+      <h2>Booking Rejected</h2>
+      <p>Hello ${renter.fullName},</p>
+      <p>Unfortunately the bike owner rejected your booking request.</p>
+      `
+    );
+
+    res.send("Booking rejected and renter notified");
+
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+};

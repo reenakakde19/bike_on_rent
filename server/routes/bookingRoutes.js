@@ -7,7 +7,9 @@ import {
   updateBookingStatus,
   cancelBooking,
   deleteBooking,
-  uploadBookingDocs
+  uploadBookingDocs,
+  acceptBooking,
+  rejectBooking
 } from "../controllers/bookingController.js";
 
 import authMiddleware from "../middleware/authmiddleware.js";
@@ -22,6 +24,8 @@ router.get("/:id", authMiddleware, getBookingById);
 router.put("/:id/status", authMiddleware, updateBookingStatus);
 router.put("/:id/cancel", authMiddleware, cancelBooking);
 router.delete("/:id", authMiddleware, deleteBooking);
+router.get("/accept/:bookingId", acceptBooking);
+router.get("/reject/:bookingId", rejectBooking);
 
 // document upload used during booking flow
 router.post(
