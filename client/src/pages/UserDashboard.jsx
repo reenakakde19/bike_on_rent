@@ -71,9 +71,7 @@ const UserDashboard = () => {
     }
   }, [config, user]);
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+
 
   useEffect(() => {
     if (user) {
