@@ -1,7 +1,7 @@
 import Booking from "../models/booking.js";
 import Bike from "../models/bike.js";
 import { setBikeAvailability } from "../utils/updateBikeAvailability.js";
-
+import sendEmail from "../utils/sendEmail.js";
 /* CREATE BOOKING */
 
 import User from "../models/user.js";
@@ -269,10 +269,13 @@ export const acceptBooking = async (req, res) => {
     const booking = await Booking.findByIdAndUpdate(
       bookingId,
       { bookingStatus: "APPROVED" },
-      { new: true }
+      { new: true }, 
     )
     .populate("renter")
-    .populate("owner")
+      .populate({
+    path: "owner",
+    select: "fullName email phone"
+  })
     .populate("bike");
 
     if (!booking) {
@@ -280,6 +283,8 @@ export const acceptBooking = async (req, res) => {
     }
 
     const renter = booking.renter;
+
+    const pickupUrl = `http://localhost:5173/pickup/${booking._id}`;
 
     // SEND EMAIL TO RENTER
     await sendEmail(
@@ -303,6 +308,20 @@ export const acceptBooking = async (req, res) => {
 
           <p>Please contact the owner for pickup details.</p>
 
+
+           <a href="${pickupUrl}"
+        style="
+        background:#20B2AA;
+        color:white;
+        padding:12px 20px;
+        text-decoration:none;
+        border-radius:6px;
+        font-weight:bold;
+        display:inline-block;
+        ">
+        🚴 Go to Pickup Page
+        </a>
+
           <p style="margin-top:20px;color:#777">
           Thank you for using <b>BikeOnRent 🚴</b>
           </p>
@@ -313,8 +332,8 @@ export const acceptBooking = async (req, res) => {
       `
     );
 
-    res.send("Booking accepted and renter notified by email");
-
+    // res.send("Booking accepted and renter notified by email");
+    res.redirect(`http://localhost:5173/handover/${booking._id}`);
   } catch (err) {
     console.error(err);
     res.status(500).send(err.message);
@@ -355,3 +374,69 @@ export const rejectBooking = async (req, res) => {
     res.status(500).send(err.message);
   }
 };
+
+export const generateOTP = async (req, res) => {
+
+  try {
+
+    const { bookingId } = req.body;
+
+    const otp = Math.floor(100000 + Math.random() * 900000);
+
+    const booking = await Booking.findByIdAndUpdate(
+      bookingId,
+      {
+        otp,
+        otpExpiry: Date.now() + 10 * 60 * 1000
+      },
+      { new: true }
+    );
+
+    res.json({
+      message: "OTP Generated",
+      otp
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+
+};
+
+export const verifyOTP = async (req, res) => {
+
+  try {
+
+    const { bookingId, otp } = req.body;
+
+    const booking = await Booking.findById(bookingId);
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    if (booking.otp !== otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    if (booking.otpExpiry < Date.now()) {
+      return res.status(400).json({ message: "OTP expired" });
+    }
+
+    booking.rideStarted = true;
+    booking.otp = null;
+
+    await booking.save();
+
+    res.json({
+      message: "OTP Verified. Ride Started 🚴"
+    });
+
+  } catch (error) {
+
+    res.status(500).json({ message: error.message });
+
+  }
+
+};
+

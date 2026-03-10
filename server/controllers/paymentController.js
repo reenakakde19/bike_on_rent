@@ -51,9 +51,6 @@ export const createPaymentOrder = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-
-
 // VERIFY PAYMENT
 export const verifyPayment = async (req, res) => {
   try {

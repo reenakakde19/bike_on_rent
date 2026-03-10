@@ -9,7 +9,9 @@ import {
   deleteBooking,
   uploadBookingDocs,
   acceptBooking,
-  rejectBooking
+  rejectBooking,
+  generateOTP,
+  verifyOTP
 } from "../controllers/bookingController.js";
 
 import authMiddleware from "../middleware/authmiddleware.js";
@@ -26,6 +28,8 @@ router.put("/:id/cancel", authMiddleware, cancelBooking);
 router.delete("/:id", authMiddleware, deleteBooking);
 router.get("/accept/:bookingId", acceptBooking);
 router.get("/reject/:bookingId", rejectBooking);
+router.post("/generate-otp", generateOTP);
+router.post("/verify-otp", verifyOTP);
 
 // document upload used during booking flow
 router.post(

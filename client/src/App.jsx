@@ -8,6 +8,8 @@ import ExploreBikes from "./pages/ExploreBikes";
 import BookingPage from "./pages/BookingPage";
 import AdminRoutes from "./routes/AdminRoutes";
 import UserDashboard from "./pages/UserDashboard";
+import OwnerHandover from "./pages/OwnerHandover";
+import PickupBike from "./pages/PickupBike";
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
       <Route path="/booking/:bikeId" element={<BookingPage />} />
       <Route path="/admin/*" element={<AdminRoutes />} />
       <Route path="/dashboard" element={<UserDashboard />} />
+      <Route path="/handover/:id" element={<OwnerHandover />} />
+      <Route path="/pickup/:id" element={<PickupBike />} />
     </Routes>
   );
 }

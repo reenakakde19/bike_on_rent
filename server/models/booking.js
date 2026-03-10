@@ -48,6 +48,14 @@ const BookingSchema = new mongoose.Schema({
     default: "pending"
   },
 
+    otp: String,
+  otpExpiry: Date,
+
+  rideStarted: {
+    type: Boolean,
+    default: false
+  },
+
   otpForHandover: String,
 
   cancellationReason: String,
