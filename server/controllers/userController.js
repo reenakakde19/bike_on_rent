@@ -42,39 +42,40 @@ export const registerUser = async (req, res) => {
       $or: [{ phone }, { email }]
     });
 
- if (existingUser) {
+    if (existingUser) {
 
-  // If user exists but not verified → resend OTP
-  if (!existingUser.isEmailVerified) {
+      // If user exists but not verified → resend OTP
+      if (!existingUser.isEmailVerified) {
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    existingUser.emailOTP = crypto
-      .createHash("sha256")
-      .update(otp)
-      .digest("hex");
+        existingUser.emailOTP = crypto
+          .createHash("sha256")
+          .update(otp)
+          .digest("hex");
 
-    existingUser.emailOTPExpiry = Date.now() + 10 * 60 * 1000;
+        existingUser.emailOTPExpiry = Date.now() + 10 * 60 * 1000;
 
-    await existingUser.save();
+        await existingUser.save();
 
-    await sendEmail(
-      email,
-      "BIKEONRENT Email Verification OTP",
-      `Your OTP is: ${otp}`
-    );
+        // 🔥 FIXED (non-blocking)
+        sendEmail(
+          email,
+          "BIKEONRENT Email Verification OTP",
+          `Your OTP is: ${otp}`
+        ).catch(err => console.error("Email failed:", err));
 
-    return res.status(200).json({
-      status: "success",
-      message: "User exists but not verified. OTP resent."
-    });
-  }
+        return res.status(200).json({
+          status: "success",
+          message: "User exists but not verified. OTP resent."
+        });
+      }
 
-  return res.status(409).json({
-    status: "fail",
-    message: "User already exists and verified"
-  });
-}
+      return res.status(409).json({
+        status: "fail",
+        message: "User already exists and verified"
+      });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -99,11 +100,12 @@ export const registerUser = async (req, res) => {
       emailOTPExpiry: Date.now() + 10 * 60 * 1000
     });
 
-    await sendEmail(
+    // 🔥 FIXED (non-blocking)
+    sendEmail(
       email,
       "BIKEONRENT Email Verification OTP",
       `Your OTP for email verification is: ${otp}`
-    );
+    ).catch(err => console.error("Email failed:", err));
 
     res.status(201).json({
       status: "success",
@@ -111,6 +113,7 @@ export const registerUser = async (req, res) => {
     });
 
   } catch (error) {
+    console.error("REGISTER ERROR:", error); // 👈 add this also
     res.status(500).json({ status: "error", message: error.message });
   }
 };
