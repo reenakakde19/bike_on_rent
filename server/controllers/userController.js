@@ -12,6 +12,7 @@ const normalizeEmail = (email) => email?.trim().toLowerCase();
 /* -------------------- REGISTER -------------------- */
 export const registerUser = async (req, res) => {
   try {
+    console.log("1. Register hit", req.body);
     let { fullName, phone, email, password } = req.body;
 
     // Validation
@@ -36,11 +37,17 @@ export const registerUser = async (req, res) => {
       });
     }
 
+    console.log("2. Validation passed");
+    
     email = normalizeEmail(email);
+
+    
 
     const existingUser = await User.findOne({
       $or: [{ phone }, { email }]
     });
+
+    console.log("3. About to query DB");
 
     if (existingUser) {
 
@@ -77,6 +84,8 @@ export const registerUser = async (req, res) => {
       });
     }
 
+   console.log("5. Creating new user");  // ← ADD
+
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -99,6 +108,9 @@ export const registerUser = async (req, res) => {
       emailOTP: hashedOTP,
       emailOTPExpiry: Date.now() + 10 * 60 * 1000
     });
+
+
+   console.log("6. User created successfully");  // ← ADD
 
     // 🔥 FIXED (non-blocking)
     sendEmail(
